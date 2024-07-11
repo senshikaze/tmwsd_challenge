@@ -1,0 +1,46 @@
+extends ../layout.pug
+
+block content
+    div(class="mx-auto w-4/5 h-full my-4 flex flex-col")
+        h1(class="text-3xl mb-4") #{message.title}
+        pre(class="my-4") #{message.message}
+        p(class="italic text-sm my-2")
+            span(class="text-yellow-300")
+                svg(xmlns="http://www.w3.org/2000/svg" class="stroke-yellow-500 dark:stroke-yellow-300 inline" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6")
+                    path(stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z")
+            |  This message has been deleted. 
+            if (timeout && timeout > 0)
+                span(class="italic") This page will redirect in 
+                    span(id="timer_counter" class="text-green-300") #{timeout}
+                    |  seconds.
+    script.
+        window.onload = () => {
+            let timeout = +"#{timeout}";
+            if (timeout && timeout > 0) {
+                let count = timeout - 1;
+                setTimeout(() => window.location.href = '/', timeout * (1000 + 500));
+                setInterval(() => {
+                    if (count < 0) {
+                        return;
+                    }
+                    let counterEl = window.document.getElementById("timer_counter");
+                    counterEl.innerHTML = count;
+
+                    let countdownPer = (count / timeout);
+                    if (countdownPer < 0.60 && countdownPer >= 0.45) {
+                        counterEl.classList.add("text-green-600");
+                    } else if (countdownPer < 0.45 && countdownPer >= 0.25) {
+                        counterEl.classList.add("dark:text-yellow-300");
+                        counterEl.classList.add("text-yellow-500");
+                    } else if (countdownPer < 0.25) {
+                        counterEl.classList.add("text-red-300");
+                        counterEl.classList.add("bold");
+                    }
+                    
+                    count = count - 1;
+                    if (count == 0) {
+                        window.location.href = "/";
+                    }
+                }, 1000);
+            }
+        };
