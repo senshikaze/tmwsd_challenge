@@ -15,8 +15,8 @@ router.get('/', async function (req, res) {
   let messages = [];
 
   await new Promise((resolve, reject) => {
-    return db.each("SELECT rowid, * FROM messages", (err, row) => {
-      messages.push({id: row.rowid, title: row.title, message: row.message})
+    return db.each("SELECT * FROM messages", (err, row) => {
+      messages.push({id: row.message_id, title: row.title, message: row.message})
     }, (err, n) => (err) ? reject(err) : resolve())
   })
 
@@ -52,8 +52,14 @@ router.post('/', function (req, res) {
   }
 
   try {
-    const statement = db.prepare("INSERT INTO messages (title, message) VALUES (?,?)")
-    statement.run(req.body.title, req.body.message)
+    // reference: https://stackoverflow.com/a/8084248
+    let id = (Math.random()+1).toString(36).substring(2);
+    // it is possible in some edge cases to get ""
+    while (id == "") {
+      id = (Math.random()+1).toString(36).substring(2);
+    }
+    const statement = db.prepare("INSERT INTO messages (message_id, title, message) VALUES (?,?,?)")
+    statement.run(id, req.body.title, req.body.message)
     statement.finalize()
     res.redirect("/")
   } catch (e) {
@@ -64,7 +70,7 @@ router.post('/', function (req, res) {
 
 /** GET a single message by id */
 router.get('/messages/:id', async function (req, res) {
-  let stmt = db.prepare("SELECT rowid, * from messages WHERE rowid = ?")
+  let stmt = db.prepare("SELECT * from messages WHERE message_id = ?")
   let message = await new Promise((resolve, reject) => {
     stmt.get([req.params.id], (err, row) => ({id: row.rowid, title: row.title, message: row.message}), (err, n) => {
       stmt.finalize()
@@ -72,7 +78,7 @@ router.get('/messages/:id', async function (req, res) {
         reject()
         return
       }
-      let del = db.prepare("DELETE FROM messages WHERE rowid = ?")
+      let del = db.prepare("DELETE FROM messages WHERE message_id = ?")
       del.run([req.params.id], (err, n) => del.finalize())
       resolve(n)
     })
