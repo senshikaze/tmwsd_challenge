@@ -1,1 +1,39 @@
-h1 TMWSD is #{adjective}!
+extends ../layout.pug
+
+block content
+    div(class="mx-auto w-4/5 flex flex-col")
+        h1(class="text-3xl mb-4") Create Message
+        - var unknownError = errors?.unknown ?? false
+        if unknownError
+            p(class="text-red-500") Unexpected Error: #{errors.unknown}
+        form(method="post")
+            div(class="flex-col my-4 mx-auto border-b-slate-700")
+                div(class="mb-2")
+                    label Title
+                div
+                    - var titleError = errors?.title ?? false;
+                    - var title = values?.title ?? "";
+                    input(class=(titleError) ? ' border-2 border-red-500 rounded-md w-96 p-2 bg-slate-100 dark:bg-slate-500' : 'rounded-md w-96 p-2 bg-slate-100 dark:bg-slate-500' type="text" name="title" placeholder="Message Title" value=title)
+                    if titleError
+                        p(class="text-red-500") #{errors.title}
+            div(class="flex-col my-2")
+                div(class="mb-2")
+                    label Message
+                div
+                    - var messageError = errors?.message ?? false;
+                    - var message = values?.message ?? ""
+                    textarea(class=(titleError) ? 'border-2 border-red-500 rounded-md w-96 min-h-72 p-2 bg-slate-100 dark:bg-slate-500' : 'rounded-md w-96 min-h-72 p-2 bg-slate-100 dark:bg-slate-500' name="message") #{message}
+                    if messageError
+                        p(class="text-red-500") #{errors.message}
+            div
+                input(type="submit" class="cursor-pointer p-2 my-2 bg-cyan-700 text-white hover:bg-cyan-800 rounded-md shadow-sm" value="Create")
+        div(class="grow flex flex-col my-4 p-2")
+            h1(class="text-3xl mb-4") Messages
+            if messages && messages.length > 0
+                - for(let message of messages)
+                    div(class="p-2 flex grow odd:bg-slate-300 dark:odd:bg-slate-700")
+                        h1(class="text-2xl grow") #{message.title}
+                        a(class="p-2 m-2 bg-cyan-700 text-white hover:bg-cyan-800 rounded-md shadow-sm" href="/messages/"+message.id) View
+            else
+                p(class="m-2 p-2") No Messages
+
